@@ -1,0 +1,10 @@
+Debug/
+Release/
+*.dll
+resource.h
+Snake.aps
+Snake.rc
+Snake.vcxproj
+Snake.vcxproj.filters
+Snake.vcxproj.user
+save_data
