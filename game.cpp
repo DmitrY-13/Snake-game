@@ -22,15 +22,21 @@ Game::Game(int fieldWidth, int fieldHeight, int cellSize, sf::RenderWindow* pWin
 bool Game::start(gameDifficulty difficulty)
 {
 	int score = 0;
+	bool needUpdateScreen = false;
+
 	sf::Text scoreText(getScoreString(score), _font, 30);
 	sf::Color background(45, 45, 45);
+
 	Snake snake(Point(5, _fieldHeight / 2), snakeDirection::RIGHT, 4);
 	Apple apple(_fieldWidth, _fieldHeight, snake.getCoordinates());
+
+	drawFrame(background, snake.getCoordinates(), apple.getCoordinates(), scoreText);
+
 	sf::Clock moveTimer;
+
 	while (true) {
 		sf::Event event;
-		while (_pWindow->pollEvent(event))
-		{
+		while (_pWindow->pollEvent(event)) {
 			if (event.type == sf::Event::Closed)
 				return true;
 			if (event.type == sf::Event::KeyPressed) {
@@ -54,12 +60,16 @@ bool Game::start(gameDifficulty difficulty)
 		if (moveTimer.getElapsedTime().asSeconds() >= _movingTimeOptions[difficulty]) {
 			snake.move();
 			moveTimer.restart();
+
+			needUpdateScreen = true;
 		}
 
 		if (snake.wasEaten(apple.getCoordinates())) {
 			apple.generateNewCoordinates(snake.getCoordinates());
 			scoreText.setString(getScoreString(++score));
 			_eatSound.play();
+
+			needUpdateScreen = true;
 		}
 
 		if (snake.isSuicide() || isWallCollision(snake.getCoordinates()[0])) {
@@ -68,7 +78,11 @@ bool Game::start(gameDifficulty difficulty)
 			return false;
 		}
 
-		drawFrame(background, snake.getCoordinates(), apple.getCoordinates(), scoreText);
+		if (needUpdateScreen) {
+			drawFrame(background, snake.getCoordinates(), apple.getCoordinates(), scoreText);
+
+			needUpdateScreen = false;
+		}
 	}
 }
 

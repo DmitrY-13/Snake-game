@@ -17,6 +17,20 @@ inline string getBestScoreString(Game game)
 		"HARD BEST SCORE: " + to_string(game.getBestScore(gameDifficulty::HARD)));
 }
 
+void drawMenu(RenderWindow* pWindow, Color background, int numberOfTexts, ...)
+{
+	pWindow->clear(background);
+
+	va_list ap;
+	va_start(ap, numberOfTexts);
+	for (int i = 0; i < numberOfTexts; i++) {
+		pWindow->draw(va_arg(ap, Text));
+	}
+	va_end(ap);
+
+	pWindow->display();
+}
+
 int main()
 {
 	ShowWindow(GetConsoleWindow(), SW_HIDE);
@@ -51,10 +65,11 @@ int main()
 	Text guideText("press the number button to select", font, 20);
 	guideText.setPosition(180, 450);
 
+	drawMenu(&window, background, 3, bestScoreText, menuText, guideText);
+
+	Event event;
 	while (window.isOpen()) {
-		Event event;
-		while (window.pollEvent(event))
-		{
+		if (window.waitEvent(event)) {
 			if (event.type == Event::Closed)
 				window.close();
 			if (event.type == Event::KeyPressed) {
@@ -69,17 +84,15 @@ int main()
 				case Keyboard::Num3:
 					isWindowClose = game.start(gameDifficulty::HARD);
 					break;
+				default:
+					continue;
 				}
-				bestScoreText.setString(getBestScoreString(game));
 				if (isWindowClose)
 					window.close();
+				bestScoreText.setString(getBestScoreString(game));
+				drawMenu(&window, background, 3, bestScoreText, menuText, guideText);
 			}
 		}
-		window.clear(background);
-		window.draw(bestScoreText);
-		window.draw(menuText);
-		window.draw(guideText);
-		window.display();
 	}
 
 	ofstream saveDataWrite("save_data");
